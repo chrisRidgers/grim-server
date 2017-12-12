@@ -1,5 +1,7 @@
 _vimrc_local.vim
 .idea
+*.swp
+*.swo
 
 composer.phar
 /vendor/
