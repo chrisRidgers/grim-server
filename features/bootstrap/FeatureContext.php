@@ -6,7 +6,7 @@ use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyClient;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyEvent;
-use Ridgers\Grim\Infrastructure\ServerProxiesEvents\SerialisedEventsMatchingServer;
+use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventsMatchingServer;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventSendingServer;
 
 
@@ -26,7 +26,7 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
-        $this->server = new SerialisedEventsMatchingServer(
+        $this->server = new EventsMatchingServer(
             new EventSendingServer()
         );
     }

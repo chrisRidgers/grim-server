@@ -5,7 +5,7 @@ use Ridgers\Grim\Domain\Server;
 use Ridgers\Grim\Domain\Event;
 use PHPUnit\Framework\TestCase;
 
-class SerialisedEventsMatchingServer extends TestCase implements Server
+class EventsMatchingServer extends TestCase implements Server
 {
     private $server;
 
