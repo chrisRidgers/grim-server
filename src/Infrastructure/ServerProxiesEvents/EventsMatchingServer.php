@@ -4,6 +4,7 @@ namespace Ridgers\Grim\Infrastructure\ServerProxiesEvents;
 use Ridgers\Grim\Domain\Server;
 use Ridgers\Grim\Domain\Event;
 use PHPUnit\Framework\TestCase;
+use Ridgers\Grim\Domain\Client;
 
 class EventsMatchingServer extends TestCase implements Server
 {
@@ -14,7 +15,17 @@ class EventsMatchingServer extends TestCase implements Server
         $this->server = $server;
     }
 
-    public function eventMatchingEventShouldHaveBeenSent(Event $eventToMatch)
+    public function attachClient(Client $client)
+    {
+        $this->server->attachClient($client);
+    }
+
+    public function getClient(string $clientName)
+    {
+        return $this->server->getClient($clientName);
+    }
+
+    public function clientShouldHaveBeenSentEventMatchingEvent(Event $eventToMatch, Iterable $eventsSentToClient)
     {
         $callback = function ($haystack, $needle) {
             foreach ($haystack as $event) {
@@ -24,22 +35,19 @@ class EventsMatchingServer extends TestCase implements Server
             }
         };
 
-        $this->assertTrue($callback($this->getSentEvents(), $eventToMatch));
+
+
+        $this->assertTrue($callback($eventsSentToClient, $eventToMatch));
     }
 
-    public function getSentEvents()
+    public function sendEvent(string $clientName, Event $event)
     {
-        return $this->server->getSentEvents();
+        $this->server->sendEvent($clientName, $event);
     }
 
-    public function sendEvent(Event $event)
+    public function receiveEvent(string $clientName, Event $event)
     {
-        $this->server->sendEvent($event);
-    }
-
-    public function receiveEvent(Event $event)
-    {
-        $this->server->receiveEvent($event);
+        $this->server->receiveEvent($clientName, $event);
     }
 
 }

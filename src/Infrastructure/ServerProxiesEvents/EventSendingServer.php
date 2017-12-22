@@ -3,25 +3,43 @@ namespace Ridgers\Grim\Infrastructure\ServerProxiesEvents;
 
 use Ridgers\Grim\Domain\Server;
 use Ridgers\Grim\Domain\Event;
+use Ridgers\Grim\Domain\Client;
 
 class EventSendingServer implements Server
 {
     private $sentEvents;
+    private $clients;
 
-    public function getSentEvents()
+    public function attachClient(Client $client)
     {
-        foreach ($this->sentEvents as $event) {
+        $this->clients[$client->getClientName()] = $client;
+    }
+
+    public function getClient(string $clientName)
+    {
+        return $this->clients[$clientName];
+    }
+
+    public function getEventsSentToClient(string $clientName)
+    {
+        if (!$this->sentEvents[$clientName]) {
+            return [];
+        }
+
+        foreach ($this->sentEvents[$clientName] as $event) {
             yield $event;
         }
     }
 
-    public function receiveEvent(Event $event)
+    public function receiveEvent(string $clientName, Event $event)
     {
-        $this->sendEvent($event);
+        $this->sendEvent($clientName, $event);
     }
 
-    public function sendEvent(Event $event)
+    public function sendEvent(string $clientName, Event $event)
     {
-        $this->sentEvents[] = $event;
+        foreach ($this->clients as $client) {
+            $this->sentEvents[$client->getClientName()][] = $event;
+        }
     }
 }

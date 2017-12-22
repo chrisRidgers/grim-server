@@ -8,6 +8,8 @@ use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyClient;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyEvent;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventsMatchingServer;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventSendingServer;
+use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventFactory;
+use Ridgers\Grim\Tests\Helpers\Transformer;
 
 
 /**
@@ -15,6 +17,7 @@ use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventSendingServer;
  */
 class FeatureContext implements Context
 {
+    private $eventSendingServer;
     private $server;
     private $clients;
     /**
@@ -26,9 +29,8 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
-        $this->server = new EventsMatchingServer(
-            new EventSendingServer()
-        );
+        $this->eventSendingServer = new EventSendingServer();
+        $this->server = new EventsMatchingServer($this->eventSendingServer);
     }
 
     /**
@@ -36,23 +38,31 @@ class FeatureContext implements Context
      */
     public function clientIsConnected(string $clientName)
     {
-        $this->clients[$clientName] = new DummyClient($this->server);
+        $this->server->attachClient(new DummyClient($clientName, $this->server));
     }
 
     /**
-     * @When client :clientName sends the event :eventName
+     * @When client :clientName sends the event :eventName with the details:
      */
-    public function clientSendsTheEvent(string $clientName, string $eventName)
+    public function clientSendsTheEvent(string $clientName, string $eventName, TableNode $eventDetails)
     {
-        $client = $this->clients[$clientName];
-        $client->sendEvent(new DummyEvent($eventName));
+        $event = EventFactory::createEventFromJsonEvent(
+            \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
+        );
+
+        $client = $this->server->getClient($clientName);
+        $client->sendEvent($event);
     }
 
     /**
-     * @Then client :clientName should have been sent the event :eventName
+     * @Then client :clientName should have been sent the event:
      */
-    public function clientShouldHaveBeenSentTheEvent(string $clientName, string $eventName)
+    public function clientShouldHaveBeenSentTheEvent(string $clientName, TableNode $eventDetails)
     {
-        $this->server->eventMatchingEventShouldHaveBeenSent(new DummyEvent($clientName, $eventName));
+        $event = EventFactory::createEventFromJsonEvent(
+            \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
+        );
+
+        $this->server->clientShouldHaveBeenSentEventMatchingEvent($event, $this->eventSendingServer->getEventsSentToClient($clientName));
     }
 }

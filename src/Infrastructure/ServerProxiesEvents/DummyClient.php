@@ -8,14 +8,21 @@ use Ridgers\Grim\Domain\Server;
 class DummyClient implements Client
 {
     private $server;
+    private $clientName;
 
-    public function __construct(Server $server)
+    public function __construct(string $clientName, Server $server)
     {
+        $this->clientName = $clientName;
         $this->server = $server;
+    }
+
+    public function getClientName()
+    {
+        return $this->clientName;
     }
 
     public function sendEvent(Event $event)
     {
-        $this->server->receiveEvent($event);
+        $this->server->receiveEvent($this->clientName, $event);
     }
 }
