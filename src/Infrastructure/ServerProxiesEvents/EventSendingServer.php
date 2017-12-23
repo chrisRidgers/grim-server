@@ -4,15 +4,18 @@ namespace Ridgers\Grim\Infrastructure\ServerProxiesEvents;
 use Ridgers\Grim\Domain\Server;
 use Ridgers\Grim\Domain\Event;
 use Ridgers\Grim\Domain\Client;
+use Ridgers\Grim\Domain\ClientConnectionPool;
+use Ridgers\Grim\Domain\EventSendingService;
 
 class EventSendingServer implements Server
 {
     private $sentEvents;
     private $clients;
 
-    public function attachClient(Client $client)
+    public function __construct(ClientConnectionPool $clientPool, EventSendingService $eventSendingService)
     {
-        $this->clients[$client->getClientName()] = $client;
+        $this->clientPool = $clientPool;
+        $this->eventSendingService = $eventSendingService;
     }
 
     public function getClient(string $clientName)
@@ -38,8 +41,8 @@ class EventSendingServer implements Server
 
     public function sendEvent(string $clientName, Event $event)
     {
-        foreach ($this->clients as $client) {
-            $this->sentEvents[$client->getClientName()][] = $event;
+        foreach ($this->clientPool->getClients() as $client) {
+            $this->eventSendingService->sendEvent($client, $event);
         }
     }
 }

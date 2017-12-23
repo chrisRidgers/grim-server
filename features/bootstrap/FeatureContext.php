@@ -10,6 +10,9 @@ use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventsMatchingServer;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventSendingServer;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventFactory;
 use Ridgers\Grim\Tests\Helpers\Transformer;
+use Ridgers\Grim\Tests\Mocks\MockClientConnectionPool;
+use Ridgers\Grim\Tests\Helpers\EventMatchingEventSendingService;
+use Ridgers\Grim\Infrastructure\ServerProxiesEvents\LoggingEventSendingService;
 
 
 /**
@@ -29,7 +32,14 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
-        $this->eventSendingServer = new EventSendingServer();
+        $this->clientConnectionPool = new MockClientConnectionPool();
+        $this->loggingEventSendingService = new LoggingEventSendingService();
+        $this->eventMatchingEventSendingService = new EventMatchingEventSendingService($this->loggingEventSendingService);
+
+        $this->eventSendingServer = new EventSendingServer(
+            $this->clientConnectionPool,
+            $this->eventMatchingEventSendingService
+        );
         $this->server = new EventsMatchingServer($this->eventSendingServer);
     }
 
@@ -38,7 +48,7 @@ class FeatureContext implements Context
      */
     public function clientIsConnected(string $clientName)
     {
-        $this->server->attachClient(new DummyClient($clientName, $this->server));
+        $this->clientConnectionPool->attachClient($clientName);
     }
 
     /**
@@ -50,8 +60,7 @@ class FeatureContext implements Context
             \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
         );
 
-        $client = $this->server->getClient($clientName);
-        $client->sendEvent($event);
+        $this->server->receiveEvent($clientName, $event);
     }
 
     /**
@@ -63,6 +72,9 @@ class FeatureContext implements Context
             \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
         );
 
-        $this->server->clientShouldHaveBeenSentEventMatchingEvent($event, $this->eventSendingServer->getEventsSentToClient($clientName));
+        $client = $this->clientConnectionPool->getClient($clientName);
+        $eventsSentToClient = $this->loggingEventSendingService->getEventsSentToClient($client);
+
+        $this->eventMatchingEventSendingService->matchingEventToClientShouldHaveBeenSent($event, $eventsSentToClient);
     }
 }
