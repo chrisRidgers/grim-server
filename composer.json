@@ -8,6 +8,8 @@
         "Ridgers\\Grim\\": "src/",
         "Ridgers\\Grim\\Tests\\": "tests/"
       }
+    },
+    "config": {
+      "bin-dir": "bin"
     }
-
 }
