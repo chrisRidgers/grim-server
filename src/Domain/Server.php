@@ -5,6 +5,5 @@ use Ridgers\Grim\Domain\Event;
 
 interface Server
 {
-    public function sendEvent(string $clientName, Event $event);
-    public function receiveEvent(string $clientName, Event $event);
+    public function receiveEvent(Event $event);
 }

@@ -40,14 +40,8 @@ class EventsMatchingServer extends TestCase implements Server
         $this->assertTrue($callback($eventsSentToClient, $eventToMatch));
     }
 
-    public function sendEvent(string $clientName, Event $event)
+    public function receiveEvent(Event $event)
     {
-        $this->server->sendEvent($clientName, $event);
+        $this->server->receiveEvent($event);
     }
-
-    public function receiveEvent(string $clientName, Event $event)
-    {
-        $this->server->receiveEvent($clientName, $event);
-    }
-
 }

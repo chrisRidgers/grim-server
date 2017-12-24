@@ -5,7 +5,7 @@ Feature:
     Scenario:
         Given client 'grim-client-001' is connected
         And client 'grim-client-002' is connected
-        When client 'grim-client-001' sends the event 'Player Casts Spell' with the details:
+        When the server receives the event:
         | Type | Player Casts Spell |
         | Spell Name | Fireball |
         | Target | NPC David |

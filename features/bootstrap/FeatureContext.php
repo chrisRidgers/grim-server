@@ -14,7 +14,6 @@ use Ridgers\Grim\Tests\Mocks\MockClientConnectionPool;
 use Ridgers\Grim\Tests\Helpers\EventMatchingEventSendingService;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\LoggingEventSendingService;
 
-
 /**
  * Defines application features from the specific context.
  */
@@ -22,7 +21,6 @@ class FeatureContext implements Context
 {
     private $eventSendingServer;
     private $server;
-    private $clients;
     /**
      * Initializes context.
      *
@@ -34,7 +32,10 @@ class FeatureContext implements Context
     {
         $this->clientConnectionPool = new MockClientConnectionPool();
         $this->loggingEventSendingService = new LoggingEventSendingService();
-        $this->eventMatchingEventSendingService = new EventMatchingEventSendingService($this->loggingEventSendingService);
+        $this->eventMatchingEventSendingService =
+            new EventMatchingEventSendingService(
+                $this->loggingEventSendingService
+            );
 
         $this->eventSendingServer = new EventSendingServer(
             $this->clientConnectionPool,
@@ -52,19 +53,21 @@ class FeatureContext implements Context
     }
 
     /**
-     * @When client :clientName sends the event :eventName with the details:
+     * @When the server receives the event:
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
-    public function clientSendsTheEvent(string $clientName, string $eventName, TableNode $eventDetails)
+    public function serverReceivesTheEvent(TableNode $eventDetails)
     {
         $event = EventFactory::createEventFromJsonEvent(
             \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
         );
 
-        $this->server->receiveEvent($clientName, $event);
+        $this->server->receiveEvent($event);
     }
 
     /**
      * @Then client :clientName should have been sent the event:
+     * @SuppressWarnings(PHPMD.StaticAccess)
      */
     public function clientShouldHaveBeenSentTheEvent(string $clientName, TableNode $eventDetails)
     {

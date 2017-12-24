@@ -34,12 +34,12 @@ class EventSendingServer implements Server
         }
     }
 
-    public function receiveEvent(string $clientName, Event $event)
+    public function receiveEvent(Event $event)
     {
-        $this->sendEvent($clientName, $event);
+        $this->sendEvent($event);
     }
 
-    public function sendEvent(string $clientName, Event $event)
+    public function sendEvent(Event $event)
     {
         foreach ($this->clientPool->getClients() as $client) {
             $this->eventSendingService->sendEvent($client, $event);
