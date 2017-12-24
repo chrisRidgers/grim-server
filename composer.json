@@ -6,7 +6,8 @@
     "autoload": {
       "psr-4": {
         "Ridgers\\Grim\\": "src/",
-        "Ridgers\\Grim\\Tests\\": "tests/"
+        "Ridgers\\Grim\\Tests\\": "tests/",
+        "Ridgers\\Grim\\Tests\\Behat\\": "features/bootstrap"
       }
     },
     "config": {

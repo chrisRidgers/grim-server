@@ -1,4 +1,5 @@
 <?php
+namespace Ridgers\Grim\Tests\Behat;
 
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
