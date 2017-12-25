@@ -16,4 +16,4 @@ Feature:
         And client 'grim-client-002' should have been sent the event:
         | Type | Player Casts Spell |
         | Spell Name | Fireball |
-        | Target | NPC David |
+	| Target | NPC David |

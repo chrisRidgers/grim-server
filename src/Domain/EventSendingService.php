@@ -1,6 +1,7 @@
 <?php
 namespace Ridgers\Grim\Domain;
 
-interface EventSendingService {
-    public function sendEvent(Client $client, Event $event);
+interface EventSendingService
+{
+    public function sendEvent(ClientConnectionInterface $client, Event $event);
 }

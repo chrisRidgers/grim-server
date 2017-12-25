@@ -1,0 +1,6 @@
+# behat.yml
+default:
+    suites:
+        default:
+            contexts:
+                - Ridgers\Grim\Tests\Behat\FeatureContext

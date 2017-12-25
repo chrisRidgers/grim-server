@@ -2,7 +2,7 @@
 namespace Ridgers\Grim\Tests\Mocks;
 
 use Ridgers\Grim\Domain\ClientConnectionPool;
-use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyClient;
+use Ridgers\Grim\Infrastructure\ServerProxiesEvents\NullClientConnection;
 
 class MockClientConnectionPool implements ClientConnectionPool
 {
@@ -19,12 +19,12 @@ class MockClientConnectionPool implements ClientConnectionPool
     public function getClients()
     {
         foreach ($this->clients as $client) {
-            yield new DummyClient($client);
+            yield new NullClientConnection($client);
         }
     }
 
     public function getClient(string $clientName)
     {
-        return new DummyClient($clientName);
+        return new NullClientConnection($clientName);
     }
 }

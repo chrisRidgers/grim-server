@@ -9,31 +9,17 @@ use Ridgers\Grim\Domain\EventSendingService;
 
 class EventSendingServer implements Server
 {
-    private $sentEvents;
-    private $clients;
-
     public function __construct(ClientConnectionPool $clientPool, EventSendingService $eventSendingService)
     {
         $this->clientPool = $clientPool;
         $this->eventSendingService = $eventSendingService;
     }
 
-    public function getClient(string $clientName)
+    public function attachClient(string $clientName)
     {
-        return $this->clients[$clientName];
+        $this->clientPool->attachClient($clientName);
     }
-
-    public function getEventsSentToClient(string $clientName)
-    {
-        if (!$this->sentEvents[$clientName]) {
-            return [];
-        }
-
-        foreach ($this->sentEvents[$clientName] as $event) {
-            yield $event;
-        }
-    }
-
+    
     public function receiveEvent(Event $event)
     {
         $this->sendEvent($event);

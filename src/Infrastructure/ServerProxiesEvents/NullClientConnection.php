@@ -1,11 +1,11 @@
 <?php
 namespace Ridgers\Grim\Infrastructure\ServerProxiesEvents;
 
-use Ridgers\Grim\Domain\Client;
+use Ridgers\Grim\Domain\ClientConnectionInterface;
 use Ridgers\Grim\Domain\Event;
 use Ridgers\Grim\Domain\Server;
 
-class DummyClient implements Client
+class NullClientConnection implements ClientConnectionInterface
 {
     private $clientName;
 

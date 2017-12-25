@@ -2,27 +2,43 @@
 namespace Ridgers\Grim\Tests\Helpers;
 
 use Ridgers\Grim\Domain\EventSendingService;
-use Ridgers\Grim\Domain\Client;
+use Ridgers\Grim\Domain\ClientConnectionInterface;
 use Ridgers\Grim\Domain\Event;
 
 class EventMatchingEventSendingService implements EventSendingService
 {
-    private $eventSendingService;
+    private $events;
 
-    public function __construct(EventSendingService $service)
+    public function __construct()
     {
-        $this->eventSendingService = $service;
-
+    }
+    
+    private function getEventsSentToClient(string $clientName)
+    {
+        foreach ($this->events as $event) {
+            if ($clientName === $event['clientName']) {
+                yield $event;
+            }
+        }
     }
 
-    public function sendEvent(Client $client, Event $event)
+
+    public function sendEvent(ClientConnectionInterface $client, Event $event)
     {
-        $this->eventSendingService->sendEvent($client, $event);
+        $this->events[] = [
+            'clientName' => $client->getClientName(),
+            'event' => $event
+        ];
     }
 
-    public function matchingEventToClientShouldHaveBeenSent(Event $event, Iterable $events)
+    /**
+     * @SuppressWarnings(PHPMD.StaticAccess)
+     */
+    public function matchingEventToClientShouldHaveBeenSent(string $clientName, Event $event)
     {
-        $callback = function($haystack, $needle) {
+        $eventsSentToClient = $this->getEventsSentToClient($clientName);
+
+        $callback = function ($haystack, $needle) {
             foreach ($haystack as $event) {
                 if ($event['event'] == $needle) {
                     return true;
@@ -32,6 +48,6 @@ class EventMatchingEventSendingService implements EventSendingService
             }
         };
         
-        \PHPUnit\Framework\Assert::assertTrue($callback($events, $event)); 
+        \PHPUnit\Framework\Assert::assertTrue($callback($eventsSentToClient, $event));
     }
 }

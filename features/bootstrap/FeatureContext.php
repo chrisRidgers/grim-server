@@ -5,7 +5,6 @@ use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\PyStringNode;
 use Behat\Gherkin\Node\TableNode;
-use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyClient;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\DummyEvent;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventsMatchingServer;
 use Ridgers\Grim\Infrastructure\ServerProxiesEvents\EventSendingServer;
@@ -20,8 +19,13 @@ use Ridgers\Grim\Infrastructure\ServerProxiesEvents\LoggingEventSendingService;
  */
 class FeatureContext implements Context
 {
-    private $eventSendingServer;
     private $server;
+
+    /**
+     * @var mixed
+     */
+    private $eventMatchingEventSendingService;
+
     /**
      * Initializes context.
      *
@@ -31,18 +35,15 @@ class FeatureContext implements Context
      */
     public function __construct()
     {
-        $this->clientConnectionPool = new MockClientConnectionPool();
-        $this->loggingEventSendingService = new LoggingEventSendingService();
+        $mockClientConnectionPool = new MockClientConnectionPool();
         $this->eventMatchingEventSendingService =
-            new EventMatchingEventSendingService(
-                $this->loggingEventSendingService
-            );
+            new EventMatchingEventSendingService();
 
-        $this->eventSendingServer = new EventSendingServer(
-            $this->clientConnectionPool,
+        $eventSendingServer = new EventSendingServer(
+            $mockClientConnectionPool,
             $this->eventMatchingEventSendingService
         );
-        $this->server = new EventsMatchingServer($this->eventSendingServer);
+        $this->server = new EventsMatchingServer($eventSendingServer);
     }
 
     /**
@@ -50,7 +51,7 @@ class FeatureContext implements Context
      */
     public function clientIsConnected(string $clientName)
     {
-        $this->clientConnectionPool->attachClient($clientName);
+        $this->server->attachClient($clientName);
     }
 
     /**
@@ -76,9 +77,6 @@ class FeatureContext implements Context
             \Ridgers\Grim\Tests\Helpers\Transformer::tableNodeToJsonEvent($eventDetails)
         );
 
-        $client = $this->clientConnectionPool->getClient($clientName);
-        $eventsSentToClient = $this->loggingEventSendingService->getEventsSentToClient($client);
-
-        $this->eventMatchingEventSendingService->matchingEventToClientShouldHaveBeenSent($event, $eventsSentToClient);
+        $this->eventMatchingEventSendingService->matchingEventToClientShouldHaveBeenSent($clientName, $event);
     }
 }

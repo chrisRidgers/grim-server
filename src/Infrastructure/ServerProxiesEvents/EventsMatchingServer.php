@@ -15,7 +15,7 @@ class EventsMatchingServer extends TestCase implements Server
         $this->server = $server;
     }
 
-    public function attachClient(Client $client)
+    public function attachClient(string $client)
     {
         $this->server->attachClient($client);
     }
